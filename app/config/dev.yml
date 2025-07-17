@@ -1,0 +1,6 @@
+db: 
+  db_name: "marketplace"
+  db_user: "postgres"
+  db_password: "postgres"
+server:
+  port : "8080"
