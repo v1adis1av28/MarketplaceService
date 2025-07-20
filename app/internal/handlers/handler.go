@@ -7,7 +7,6 @@ import (
 	"mp-service/internal/utils"
 	"net/http"
 	"regexp"
-	"strings"
 	"time"
 	"unicode"
 
@@ -26,10 +25,11 @@ func NewAuthHandler(service *auth.AuthService) *AuthHandler {
 
 func (ah *AuthHandler) Login(c *gin.Context) {
 
-	checkToken := strings.Trim(c.GetHeader("Authorization"), "Bearer ")
-	if len(checkToken) > 0 {
-		isTokenExpired, err := utils.IsTokenExpired(checkToken)
+	tokenHeader := c.GetHeader("Authorization")
+	if len(tokenHeader) > 0 {
+		isTokenExpired, err := utils.IsTokenExpired(c.GetHeader("Authorization"))
 		if err != nil {
+			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
 		}
@@ -122,7 +122,13 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 }
 
 func (ah *AuthHandler) Logout(c *gin.Context) {
+	if len(c.GetHeader("Authorization")) == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "you are not authorize"})
+		return
+	}
 
+	c.Header("Authorization", "")
+	c.JSON(http.StatusOK, gin.H{"message": "you logout succesfully!"})
 }
 
 func isEmailValid(e string) bool {

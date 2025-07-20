@@ -2,9 +2,10 @@ package utils
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,24 +19,34 @@ func CompareHashPassword(password, hash string) bool {
 	return err == nil
 }
 
-func IsTokenExpired(s string) (bool, error) {
-	token, err := jwt.Parse(s, func(token *jwt.Token) (interface{}, error) {
-		return "jwtSecret", nil
-	})
-	if err != nil {
-		return false, err
+func IsTokenExpired(tokenString string) (bool, error) {
+	if len(tokenString) > 7 && strings.HasPrefix(tokenString, "Bearer ") {
+		tokenString = tokenString[7:]
 	}
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte("jwtSecret"), nil
+	})
+
+	if err != nil {
+		return false, fmt.Errorf("token parsing failed: %w", err)
+	}
+
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		expVal, ok := claims["exp"].(float64)
-		if !ok {
-			return false, fmt.Errorf("exp claim not found or invalid")
+		exp, err := claims.GetExpirationTime()
+		if err != nil {
+			return false, fmt.Errorf("could not get expiration time: %w", err)
 		}
 
-		expTime := time.Unix(int64(expVal), 0)
-		if time.Now().After(expTime) {
-			return true, nil
+		if exp == nil {
+			return false, fmt.Errorf("token has no expiration time")
 		}
-		return false, nil
+
+		return time.Now().After(exp.Time), nil
 	}
-	return false, fmt.Errorf("token was expired")
+
+	return false, fmt.Errorf("invalid token")
 }
