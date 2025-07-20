@@ -150,6 +150,5 @@ func isPasswordValid(p string) bool {
 			chFlag = true
 		}
 	}
-
 	return digitFlag && chFlag
 }

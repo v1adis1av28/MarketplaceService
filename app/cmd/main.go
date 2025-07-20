@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"mp-service/internal/app"
-	"mp-service/internal/auth"
 	"mp-service/internal/config"
 	"mp-service/internal/database"
 	"mp-service/internal/handlers"
 	"mp-service/internal/repository/user"
+	auth "mp-service/internal/service"
 )
 
 func main() {
