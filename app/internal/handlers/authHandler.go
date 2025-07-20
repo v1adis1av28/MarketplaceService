@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"fmt"
-	"mp-service/internal/auth"
 	"mp-service/internal/models"
+	auth "mp-service/internal/service"
 	"mp-service/internal/utils"
 	"net/http"
 	"regexp"
