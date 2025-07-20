@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 	"time"
+	"unicode"
 
 	jwt "github.com/golang-jwt/jwt/v5"
 
@@ -32,11 +33,13 @@ func (ah *AuthHandler) Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//TODO добавить проверку валидности пароля
-
 	//проверка на валидность введенных данных
 	if !isEmailValid(regReq.Email) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "incorrectly entered email address"})
+		return
+	}
+	if !isPasswordValid(regReq.Password) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "the password is too simple it must contain at least 6 characters and 1 digit"})
 		return
 	}
 	//проверка зарегистрирован ли пользователь с таким емайл уже?
@@ -81,4 +84,22 @@ func (ah *AuthHandler) Logout(c *gin.Context) {
 func isEmailValid(e string) bool {
 	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	return emailRegex.MatchString(e)
+}
+
+func isPasswordValid(p string) bool {
+	if len(p) < 6 {
+		return false
+	}
+	digitFlag := false
+	chFlag := false
+	for _, ch := range p {
+		if unicode.IsDigit(ch) {
+			digitFlag = true
+		}
+		if unicode.IsLower(ch) || unicode.IsUpper(ch) {
+			chFlag = true
+		}
+	}
+
+	return digitFlag && chFlag
 }
