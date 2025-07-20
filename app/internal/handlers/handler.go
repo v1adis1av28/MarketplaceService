@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"mp-service/internal/auth"
 	"mp-service/internal/models"
+	"mp-service/internal/utils"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 	"unicode"
 
@@ -24,10 +26,52 @@ func NewAuthHandler(service *auth.AuthService) *AuthHandler {
 
 func (ah *AuthHandler) Login(c *gin.Context) {
 
+	checkToken := strings.Trim(c.GetHeader("Authorization"), "Bearer ")
+	if len(checkToken) > 0 {
+		isTokenExpired, err := utils.IsTokenExpired(checkToken)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+
+		if !isTokenExpired {
+			c.JSON(http.StatusOK, gin.H{"message": "you already authorize!"})
+			return
+		}
+	}
+
+	authReq := models.AuthUserReq{}
+	if err := c.ShouldBindJSON(&authReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "wrong input data"})
+		return
+	}
+	//передаем в сервис полученные данные, там проверяем соответствие данным из бд
+	err := ah.service.AuthorizeUser(authReq)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	//Генерим сам токен и возвращаем сам токен ответом
+	payload := jwt.MapClaims{
+		"sub": authReq.Email,
+		"exp": time.Now().Add(time.Hour * 72).Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+
+	t, err := token.SignedString([]byte("jwtSecret"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while creating jwt token"})
+		return
+	}
+
+	c.Header("Authorization", "Bearer "+t)
+	c.JSON(http.StatusOK, gin.H{"message": "you succesfully authorize!", "token": t})
 }
 
 func (ah *AuthHandler) Register(c *gin.Context) {
-	regReq := models.RegistrationUserReq{}
+	regReq := models.AuthUserReq{}
 	err := c.ShouldBindJSON(&regReq)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

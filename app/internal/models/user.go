@@ -6,7 +6,7 @@ type User struct {
 	Role     string `json :"role"`
 }
 
-type RegistrationUserReq struct {
+type AuthUserReq struct {
 	Email    string `json : "email"`
 	Password string `json : "password"`
 }
