@@ -7,7 +7,9 @@ import (
 	"mp-service/internal/config"
 	"mp-service/internal/database"
 	"mp-service/internal/handlers"
+	"mp-service/internal/repository/ad"
 	"mp-service/internal/repository/user"
+	"mp-service/internal/service"
 	auth "mp-service/internal/service"
 )
 
@@ -26,6 +28,10 @@ func main() {
 	userRepo := user.NewUserRepository(db.DB_CONN)
 	authService := auth.NewAuthService(userRepo)
 	authHandler := handlers.NewAuthHandler(authService)
-	app.MustStart(authHandler)
+
+	adRepo := ad.NewAdRepository(db.DB_CONN)
+	adService := service.NewAdService(adRepo)
+	adsHandler := handlers.NewAdsHandler(adService)
+	app.MustStart(authHandler, adsHandler)
 	//TODO добавить gracefull shutdown
 }

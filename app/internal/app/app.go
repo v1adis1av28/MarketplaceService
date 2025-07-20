@@ -4,6 +4,7 @@ import (
 	"log"
 	"mp-service/internal/database"
 	"mp-service/internal/handlers"
+	"mp-service/internal/middleware"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +22,7 @@ func NewApp(db *database.DB) *App {
 	}
 }
 
-func (a *App) MustStart(ah *handlers.AuthHandler) {
+func (a *App) MustStart(ah *handlers.AuthHandler, ads *handlers.AdsHandler) {
 	a.Router.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
@@ -34,14 +35,14 @@ func (a *App) MustStart(ah *handlers.AuthHandler) {
 		}
 		c.Next()
 	})
-	if err := a.Run(ah); err != nil {
+	if err := a.Run(ah, ads); err != nil {
 		panic(err)
 	}
 }
 
-func (app *App) Run(ah *handlers.AuthHandler) error {
+func (app *App) Run(ah *handlers.AuthHandler, ads *handlers.AdsHandler) error {
 
-	if err := app.SetupRoutes(ah); err != nil {
+	if err := app.SetupRoutes(ah, ads); err != nil {
 		log.Fatal("Failed to setup server routes", "error", err)
 		return err
 	}
@@ -53,9 +54,10 @@ func (app *App) Run(ah *handlers.AuthHandler) error {
 	return nil
 }
 
-func (app *App) SetupRoutes(ah *handlers.AuthHandler) error {
+func (app *App) SetupRoutes(ah *handlers.AuthHandler, ads *handlers.AdsHandler) error {
 	app.Router.POST("/auth/login", ah.Login)
 	app.Router.POST("/auth/register", ah.Register)
 	app.Router.GET("/auth/logout", ah.Logout)
+	app.Router.POST("/advertisement", middleware.AuthMiddleware(), ads.CreateAd)
 	return nil
 }
