@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"mp-service/internal/models"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -22,20 +23,21 @@ func (a *AdRepository) NewAd(ads models.AdsDTO, email string) (*models.Advertise
 	var newAd models.Advertisement
 
 	sqlStatement := `
-        INSERT INTO ADVERTISEMENT (HEADER, DESCRIPTION, IMAGE_URL, PRICE, OWNER_ID)
-        SELECT $1, $2, $3, $4, USERS.ID 
-        FROM USERS 
-        WHERE EMAIL = $5
-        RETURNING HEADER, DESCRIPTION, IMAGE_URL, PRICE, OWNER_ID`
+        INSERT INTO ADVERTISEMENT (HEADER, DESCRIPTION, IMAGE_URL, PRICE, OWNER_ID, CREATED_AT)
+		SELECT $1, $2, $3, $4, USERS.ID, $5
+		FROM USERS
+		WHERE EMAIL = $6
+		RETURNING HEADER, DESCRIPTION, IMAGE_URL, PRICE, OWNER_ID, CREATED_AT`
 
 	err = tx.QueryRow(context.Background(), sqlStatement,
-		ads.Header, ads.Description, ads.ImageUrl, ads.Price, email,
+		ads.Header, ads.Description, ads.ImageUrl, ads.Price, time.Now(), email,
 	).Scan(
 		&newAd.Header,
 		&newAd.Description,
 		&newAd.ImageUrl,
 		&newAd.Price,
 		&newAd.OwnerID,
+		&newAd.Created_at,
 	)
 	if err := tx.Commit(context.Background()); err != nil {
 		return nil, fmt.Errorf("error commiting transaction")

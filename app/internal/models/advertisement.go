@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type Advertisement struct {
 	//header, description,url,price
 	OwnerID     int    `json:"-"`
@@ -7,6 +9,7 @@ type Advertisement struct {
 	Description string `json:"ad_description"`
 	ImageUrl    string `json:"ad_image"`
 	Price       int    `json:"price"`
+	Created_at  time.Time
 }
 
 type AdsDTO struct {
