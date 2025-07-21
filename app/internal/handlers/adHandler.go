@@ -49,3 +49,20 @@ func (adh *AdsHandler) CreateAd(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "ads was succesfully created!",
 		"advertisement": advertisement})
 }
+
+func (adh *AdsHandler) GetAds(c *gin.Context) {
+	sortField := c.DefaultQuery("sort", "created_at")
+	order := c.DefaultQuery("order", "desc")
+	limit := c.DefaultQuery("limit", "5")
+	offset := c.DefaultQuery("offset", "0")
+
+	userEmail, _ := utils.GetSubFromToken(c.GetHeader("Authorization"))
+
+	ads, err := adh.adService.GetAds(sortField, order, limit, offset, userEmail)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch ads feed"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"ads": ads})
+}

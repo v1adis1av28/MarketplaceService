@@ -59,5 +59,7 @@ func (app *App) SetupRoutes(ah *handlers.AuthHandler, ads *handlers.AdsHandler) 
 	app.Router.POST("/auth/register", ah.Register)
 	app.Router.GET("/auth/logout", ah.Logout)
 	app.Router.POST("/advertisement", middleware.AuthMiddleware(), ads.CreateAd)
+	app.Router.GET("/advertisements", ads.GetAds)
+
 	return nil
 }

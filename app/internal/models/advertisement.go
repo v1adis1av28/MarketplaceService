@@ -18,3 +18,14 @@ type AdsDTO struct {
 	ImageUrl    string `json:"image"`
 	Price       int    `json:"price"`
 }
+
+type AdFeed struct {
+	ID          int       `json:"id"`
+	Header      string    `json:"header"`
+	Description string    `json:"description"`
+	ImageUrl    string    `json:"image"`
+	Price       int       `json:"price"`
+	CreatedAt   time.Time `json:"created_at"`
+	OwnerEmail  string    `json:"owner_email"`
+	IsOwner     bool      `json:"is_owner"`
+}
