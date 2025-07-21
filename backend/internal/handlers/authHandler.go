@@ -26,17 +26,16 @@ func NewAuthHandler(service *auth.AuthService) *AuthHandler {
 func (ah *AuthHandler) Login(c *gin.Context) {
 
 	tokenHeader := c.GetHeader("Authorization")
-	if len(tokenHeader) > 0 {
-		isTokenExpired, err := utils.IsTokenExpired(c.GetHeader("Authorization"))
-		if err != nil {
-			fmt.Println(err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-			return
-		}
-
-		if !isTokenExpired {
-			c.JSON(http.StatusOK, gin.H{"message": "you already authorize!"})
-			return
+	if tokenHeader != "" {
+		isExpired, err := utils.IsTokenExpired(tokenHeader)
+		if err == nil && !isExpired {
+			_, err := utils.GetSubFromToken(tokenHeader)
+			if err == nil {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"message": fmt.Sprintf("you are already authorized"),
+				})
+				return
+			}
 		}
 	}
 
