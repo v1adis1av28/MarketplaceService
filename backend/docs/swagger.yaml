@@ -1,0 +1,155 @@
+definitions:
+  models.Advertisement:
+    properties:
+      ad_description:
+        type: string
+      ad_header:
+        type: string
+      ad_image:
+        type: string
+      created_at:
+        type: string
+      price:
+        type: integer
+    type: object
+  models.AuthUserReq:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: REST API для маркетплейса с объявлениями и авторизацией пользователей.
+  termsOfService: http://swagger.io/terms/
+  title: Marketplace API
+  version: "1.0"
+paths:
+  /api/advertisement:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Новое объявление
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.Advertisement'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Создание объявления
+      tags:
+      - advertisements
+  /api/advertisements:
+    get:
+      parameters:
+      - description: Лимит
+        in: query
+        name: limit
+        type: integer
+      - description: Смещение
+        in: query
+        name: offset
+        type: integer
+      - description: По убыванию или возрастанию (desc, asc)
+        in: query
+        name: order
+        type: string
+      - description: По какому полю будет сортировка (price, created_at)
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Advertisement'
+            type: array
+      summary: Получить список объявлений
+      tags:
+      - advertisements
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Авторизует пользователя по email и паролю
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.AuthUserReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Авторизация
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Регистрирует нового пользователя
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.AuthUserReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Регистрация
+      tags:
+      - auth
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
