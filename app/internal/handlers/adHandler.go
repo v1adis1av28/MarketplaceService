@@ -19,7 +19,6 @@ func NewAdsHandler(ads *service.AdService) *AdsHandler {
 }
 
 func (adh *AdsHandler) CreateAd(c *gin.Context) {
-	//получаем дтошку с данными по объявлению
 	var ads models.AdsDTO
 	err := c.ShouldBindBodyWithJSON(&ads)
 	if err != nil {
@@ -32,8 +31,18 @@ func (adh *AdsHandler) CreateAd(c *gin.Context) {
 		c.JSON(http.StatusExpectationFailed, gin.H{"error": err.Error()})
 		return
 	}
-	//После парсинга надо проверить валидность всех данных  в объявлении
-	// наличие заголовка и описания(их размерность), изображение проверить на регулярке(обязательно использованеи .jpeg .png)
-	// проверка цена просто что не отрицательная
 
+	usrEmail, err := utils.GetSubFromToken(c.GetHeader("Authorization"))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "error with sub in token"})
+		return
+	}
+
+	err = adh.adService.CreateAd(ads, usrEmail)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to create advertisement"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "ads was succesfully created!"})
 }
