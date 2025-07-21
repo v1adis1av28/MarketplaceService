@@ -9,7 +9,7 @@ type AdService struct {
 	repository *ad.AdRepository
 }
 
-func (a *AdService) CreateAd(ads models.AdsDTO, email string) error {
+func (a *AdService) CreateAd(ads models.AdsDTO, email string) (*models.Advertisement, error) {
 	return a.repository.NewAd(ads, email)
 }
 

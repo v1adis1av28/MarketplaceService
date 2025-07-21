@@ -13,23 +13,37 @@ type AdRepository struct {
 	db *pgx.Conn
 }
 
-func (a *AdRepository) NewAd(ads models.AdsDTO, email string) error {
+func (a *AdRepository) NewAd(ads models.AdsDTO, email string) (*models.Advertisement, error) {
 	tx, err := a.db.Begin(context.Background())
 	if err != nil {
-		return fmt.Errorf("Error on openning transaction")
+		return nil, fmt.Errorf("Error on openning transaction")
 	}
 	defer tx.Rollback(context.Background())
+	var newAd models.Advertisement
 
-	sqlStatement := "INSERT INTO ADVERTISEMENT (HEADER,DESCRIPTION,IMAGE_URL,PRICE,OWNER_ID) SELECT $1, $2,$3,$4, USERS.ID FROM USERS WHERE EMAIL = $5"
-	_, err = tx.Exec(context.Background(), sqlStatement, ads.Header, ads.Description, ads.ImageUrl, ads.Price, email)
-	if err != nil {
-		return fmt.Errorf("Error while inserting new ads in db")
-	}
+	sqlStatement := `
+        INSERT INTO ADVERTISEMENT (HEADER, DESCRIPTION, IMAGE_URL, PRICE, OWNER_ID)
+        SELECT $1, $2, $3, $4, USERS.ID 
+        FROM USERS 
+        WHERE EMAIL = $5
+        RETURNING HEADER, DESCRIPTION, IMAGE_URL, PRICE, OWNER_ID`
+
+	err = tx.QueryRow(context.Background(), sqlStatement,
+		ads.Header, ads.Description, ads.ImageUrl, ads.Price, email,
+	).Scan(
+		&newAd.Header,
+		&newAd.Description,
+		&newAd.ImageUrl,
+		&newAd.Price,
+		&newAd.OwnerID,
+	)
 	if err := tx.Commit(context.Background()); err != nil {
-		return fmt.Errorf("error commiting transaction")
+		return nil, fmt.Errorf("error commiting transaction")
 	}
+	fmt.Println("repo")
+	fmt.Println(newAd)
 	log.Printf("creating new ads successfuly")
-	return nil
+	return &newAd, nil
 }
 
 func NewAdRepository(db *pgx.Conn) *AdRepository {

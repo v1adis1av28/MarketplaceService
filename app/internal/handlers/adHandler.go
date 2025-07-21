@@ -38,11 +38,14 @@ func (adh *AdsHandler) CreateAd(c *gin.Context) {
 		return
 	}
 
-	err = adh.adService.CreateAd(ads, usrEmail)
+	advertisement, err := adh.adService.CreateAd(ads, usrEmail)
+	fmt.Println("handler ads")
+	fmt.Println(advertisement)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to create advertisement"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "ads was succesfully created!"})
+	c.JSON(http.StatusOK, gin.H{"message": "ads was succesfully created!",
+		"advertisement": advertisement})
 }
