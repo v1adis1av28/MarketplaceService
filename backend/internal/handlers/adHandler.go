@@ -18,6 +18,16 @@ func NewAdsHandler(ads *service.AdService) *AdsHandler {
 	return &AdsHandler{adService: ads}
 }
 
+// CreateAdvertisement godoc
+// @Summary Создание объявления
+// @Security ApiKeyAuth
+// @Tags advertisements
+// @Accept json
+// @Produce json
+// @Param input body models.Advertisement true "Новое объявление"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Router /api/advertisement [post]
 func (adh *AdsHandler) CreateAd(c *gin.Context) {
 	var ads models.AdsDTO
 	err := c.ShouldBindBodyWithJSON(&ads)
@@ -50,6 +60,16 @@ func (adh *AdsHandler) CreateAd(c *gin.Context) {
 		"advertisement": advertisement})
 }
 
+// GetAdvertisements godoc
+// @Summary Получить список объявлений
+// @Tags advertisements
+// @Produce json
+// @Param limit query int false "Лимит"
+// @Param offset query int false "Смещение"
+// @Param order query string false "По убыванию или возрастанию (desc, asc)"
+// @Param sort query string false "По какому полю будет сортировка (price, created_at)"
+// @Success 200 {array} models.Advertisement
+// @Router /api/advertisements [get]
 func (adh *AdsHandler) GetAds(c *gin.Context) {
 	sortField := c.DefaultQuery("sort", "created_at")
 	order := c.DefaultQuery("order", "desc")

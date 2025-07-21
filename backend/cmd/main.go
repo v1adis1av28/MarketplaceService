@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	_ "mp-service/docs"
 	"mp-service/internal/app"
 	"mp-service/internal/config"
 	"mp-service/internal/database"
@@ -13,6 +14,15 @@ import (
 	auth "mp-service/internal/service"
 )
 
+// @title Marketplace API
+// @version 1.0
+// @description REST API для маркетплейса с объявлениями и авторизацией пользователей.
+// @termsOfService http://swagger.io/terms/
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @host localhost:8080
+// @BasePath /
 func main() {
 
 	cfg, err := config.Load()

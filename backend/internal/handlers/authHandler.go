@@ -23,6 +23,16 @@ func NewAuthHandler(service *auth.AuthService) *AuthHandler {
 	return &AuthHandler{service: service}
 }
 
+// Login godoc
+// @Summary Авторизация
+// @Description Авторизует пользователя по email и паролю
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body models.AuthUserReq true "Данные пользователя"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Router /auth/login [post]
 func (ah *AuthHandler) Login(c *gin.Context) {
 
 	tokenHeader := c.GetHeader("Authorization")
@@ -69,6 +79,16 @@ func (ah *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "you succesfully authorize!", "token": t})
 }
 
+// Register godoc
+// @Summary Регистрация
+// @Description Регистрирует нового пользователя
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body models.AuthUserReq true "Данные пользователя"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Router /auth/register [post]
 func (ah *AuthHandler) Register(c *gin.Context) {
 	regReq := models.AuthUserReq{}
 	err := c.ShouldBindJSON(&regReq)

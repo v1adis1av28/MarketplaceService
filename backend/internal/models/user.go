@@ -7,6 +7,6 @@ type User struct {
 }
 
 type AuthUserReq struct {
-	Email    string `json : "email"`
-	Password string `json : "password"`
+	Email    string `json : "email" example:"test1@example.com"`
+	Password string `json : "password" example:"1234"`
 }

@@ -8,6 +8,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type App struct {
@@ -62,5 +64,6 @@ func (app *App) SetupRoutes(ah *handlers.AuthHandler, ads *handlers.AdsHandler) 
 	app.Router.POST("/api/advertisement", middleware.AuthMiddleware(), ads.CreateAd)
 	app.Router.GET("/api/advertisements", ads.GetAds)
 
+	app.Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return nil
 }
